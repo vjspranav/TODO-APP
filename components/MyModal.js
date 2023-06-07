@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 
 const MyModal = ({ visible, setVisible, setTodos, todos }) => {
@@ -79,6 +80,20 @@ const MyModal = ({ visible, setVisible, setTodos, todos }) => {
           >
             <Button
               onPress={() => {
+                if (!title) {
+                  ToastAndroid.show(
+                    "Title cannot be empty",
+                    ToastAndroid.SHORT
+                  );
+                  return;
+                }
+                if (!description) {
+                  ToastAndroid.show(
+                    "Description cannot be empty",
+                    ToastAndroid.SHORT
+                  );
+                  return;
+                }
                 setTodos([
                   ...todos,
                   {
