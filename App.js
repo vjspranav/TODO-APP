@@ -1,23 +1,28 @@
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Card, CheckBox, Header } from "react-native-elements";
-import { useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from "react";
 import MyModal from "./components/MyModal";
 
 export default function App() {
-  const [todos, setTodos] = useState([
-    {
-      title: "Todo 1",
-      description: "Description 1",
-      isDone: false,
-    },
-    {
-      title: "x",
-      description: "x",
-      isDone: false,
-    },
-  ]);
+
+  
+  const [todos, setTodos] = useState([]);
   const [visible, setVisible] = useState(false);
+
+  const updateTodos = (todos) => {
+    setTodos(todos);
+    AsyncStorage.setItem('todos', JSON.stringify(todos));
+  };
+  
+  useEffect(() => {
+    AsyncStorage.getItem('todos').then((value) => {
+      if (value) {
+        updateTodos(JSON.parse(value));
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -36,9 +41,34 @@ export default function App() {
             setVisible(true);
           },
         }}
+        // Add a hamburger menu button to the left which has filters 
+        leftComponent={{
+          icon: "menu",
+          color: "#fff",
+          onPress: () => {
+            // Add a menu to filter todos
+          },
+        }}
       />
       <StatusBar style="hidden" />
       <View style={styles.container}>
+        {/* Add a single long View which shows total todos, completed and remaining */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            width: "100%",
+            marginBottom: 10,
+          }}
+        >
+          <Text>Total: {todos.length}</Text>
+          <Text>
+            Completed: {todos.filter((todo) => todo.isDone).length}
+          </Text>
+          <Text>
+            Remaining: {todos.filter((todo) => !todo.isDone).length}
+          </Text>
+        </View>
         <ScrollView
           width="100%"
           contentContainerStyle={{ alignItems: "center" }}
@@ -68,7 +98,7 @@ export default function App() {
                 >
                   <CheckBox
                     onPress={() => {
-                      setTodos(
+                      updateTodos(
                         todos.map((item) => {
                           if (item.title === todo.title) {
                             return {
@@ -101,7 +131,7 @@ export default function App() {
       <MyModal
         visible={visible}
         setVisible={setVisible}
-        setTodos={setTodos}
+        setTodos={updateTodos}
         todos={todos}
       />
     </>
